@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
@@ -5,7 +6,7 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 
 const app = express();
-const port = 3001;
+const server_port = process.env.PORT || 3001;
 
 // Configure CORS
 const corsOptions = {
@@ -18,7 +19,6 @@ app.use(express.json());
 // Connect to MongoDB
 const MONGO_URI = process.env.MONGO_URI;
 const JWT_SECRET = process.env.JWT_SECRET;
-const port = process.env.PORT || 3001;
 
 mongoose.connect(MONGO_URI)
     .then(() => console.log('MongoDB connected'))
@@ -144,6 +144,6 @@ app.get('/api/auth/me', protect, async (req, res) => {
     res.status(200).json(req.user);
 });
 
-app.listen(port, () => {
-    console.log(`Server is running on http://localhost:${port}`);
+app.listen(server_port, () => {
+    console.log(`Server is running on http://localhost:${server_port}`);
 });
