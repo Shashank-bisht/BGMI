@@ -37,7 +37,7 @@ const userSchema = new mongoose.Schema({
     pin: { type: String, required: true, select: false },
     availability: [availabilitySchema]
 });
-
+//fdfd
 userSchema.methods.getSignedJwtToken = function() {
     return jwt.sign({ id: this._id }, JWT_SECRET, {
         expiresIn: '30d'
