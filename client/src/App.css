@@ -36,3 +36,29 @@
     transform: rotate(360deg);
   }
 }
+body {
+  background-color: #f8f9fa;
+}
+
+.container {
+  max-width: 960px;
+}
+
+.card {
+  border: none;
+}
+
+.card-header {
+  background-color: #fff;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.form-label {
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.btn-danger {
+    --bs-btn-hover-bg: #bb2d3b;
+    --bs-btn-hover-border-color: #b02a37;
+}

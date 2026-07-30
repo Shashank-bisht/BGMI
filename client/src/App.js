@@ -12,6 +12,11 @@ const authHeader = () => {
 
 const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:3001';
 
+const formatDate = (dateString) => {
+    const options = { year: 'numeric', month: 'long', day: 'numeric' };
+    return new Date(dateString).toLocaleDateString(undefined, options);
+};
+
 function App() {
     const [auth, setAuth] = useState(null);
     const [users, setUsers] = useState([]);
@@ -74,6 +79,10 @@ function App() {
                 alert('Start date cannot be after end date.');
                 return;
             }
+            if (slot.start >= slot.end) {
+                alert('Start time must be before end time.');
+                return;
+            }
         }
         try {
             const res = await fetch(`${apiUrl}/api/users/availability`, {
@@ -114,54 +123,59 @@ function App() {
 
     return (
         <div className="container mt-4">
-            <div className="d-flex justify-content-between align-items-center mb-4">
+            <header className="d-flex justify-content-between align-items-center mb-4">
                 <h1>BGMI Availability</h1>
                 <div>
                     <span className="me-3">Welcome, {auth.name}!</span>
-                    <button className="btn btn-danger" onClick={handleLogout}>Logout</button>
+                    <button className="btn btn-outline-danger" onClick={handleLogout}>Logout</button>
                 </div>
-            </div>
+            </header>
 
-            <div className="card mb-4">
-                <div className="card-body">
-                    <h5 className="card-title">Update Your Availability</h5>
-                    <form onSubmit={handleUpdateAvailability}>
-                        {timeSlots.map((slot, index) => (
-                            <div key={index} className="d-flex align-items-center mb-2">
-                                <input type="date" className="form-control me-2" value={slot.startDate} onChange={e => handleSlotChange(index, 'startDate', e.target.value)} />
-                                <input type="date" className="form-control me-2" value={slot.endDate} onChange={e => handleSlotChange(index, 'endDate', e.target.value)} />
-                                <select className="form-select me-2" value={slot.start} onChange={e => handleSlotChange(index, 'start', e.target.value)}>
-                                    {timeOptions.map(t => <option key={t + '-start'} value={t}>{t}</option>)}
-                                </select>
-                                <span className="me-2">to</span>
-                                <select className="form-select me-2" value={slot.end} onChange={e => handleSlotChange(index, 'end', e.target.value)}>
-                                    {timeOptions.map(t => <option key={t + '-end'} value={t}>{t}</option>)}
-                                </select>
-                                <button type="button" className="btn btn-sm btn-danger" onClick={() => removeSlot(index)}>X</button>
+            <main>
+                <div className="card mb-4">
+                    <div className="card-body">
+                        <h5 className="card-title">Update Your Availability</h5>
+                        <form onSubmit={handleUpdateAvailability}>
+                            {timeSlots.map((slot, index) => (
+                                <div key={index} className="d-md-flex align-items-center mb-2">
+                                    <input type="date" className="form-control me-md-2 mb-2 mb-md-0" value={slot.startDate} onChange={e => handleSlotChange(index, 'startDate', e.target.value)} />
+                                    <input type="date" className="form-control me-md-2 mb-2 mb-md-0" value={slot.endDate} onChange={e => handleSlotChange(index, 'endDate', e.target.value)} />
+                                    <select className="form-select me-md-2 mb-2 mb-md-0" value={slot.start} onChange={e => handleSlotChange(index, 'start', e.target.value)}>
+                                        {timeOptions.map(t => <option key={t + '-start'} value={t}>{t}</option>)}
+                                    </select>
+                                    <span className="me-md-2 mb-2 mb-md-0">to</span>
+                                    <select className="form-select me-md-2 mb-2 mb-md-0" value={slot.end} onChange={e => handleSlotChange(index, 'end', e.target.value)}>
+                                        {timeOptions.map(t => <option key={t + '-end'} value={t}>{t}</option>)}
+                                    </select>
+                                    <button type="button" className="btn btn-sm btn-outline-danger" onClick={() => removeSlot(index)}>Remove</button>
+                                </div>
+                            ))}
+                            <button type="button" className="btn btn-secondary me-2" onClick={addSlot}>+ Add Slot</button>
+                            <button className="btn btn-primary" type="submit">Update Availability</button>
+                        </form>
+                    </div>
+                </div>
+
+                <div className="card">
+                    <div className="card-body">
+                        <h5 className="card-title">Team Availability</h5>
+                        {users.map(user => (
+                            <div className="card mb-3" key={user._id}>
+                                <div className="card-body">
+                                    <h6 className="card-title">{user.name}</h6>
+                                    {user.availability && user.availability.length > 0 ? (
+                                        user.availability.map((slot, index) => (
+                                            <p className="card-text" key={index}>
+                                                Available from <strong>{slot.startDate && formatDate(slot.startDate)}</strong> to <strong>{slot.endDate && formatDate(slot.endDate)}</strong> between <strong>{slot.start}</strong> to <strong>{slot.end}</strong>
+                                            </p>
+                                        ))
+                                    ) : (<p className="card-text">Not available</p>)}
+                                </div>
                             </div>
                         ))}
-                        <button type="button" className="btn btn-secondary me-2" onClick={addSlot}>+ Add Slot</button>
-                        <button className="btn btn-primary" type="submit">Update Availability</button>
-                    </form>
-                </div>
-            </div>
-
-            <div>
-                {users.map(user => (
-                    <div className="card mb-3" key={user._id}>
-                        <div className="card-body">
-                            <h5 className="card-title">{user.name}</h5>
-                            {user.availability && user.availability.length > 0 ? (
-                                user.availability.map((slot, index) => (
-                                    <p className="card-text" key={index}>
-                                        Available from <strong>{slot.startDate && new Date(slot.startDate).toLocaleDateString()}</strong> to <strong>{slot.endDate && new Date(slot.endDate).toLocaleDateString()}</strong> between <strong>{slot.start}</strong> to <strong>{slot.end}</strong>
-                                    </p>
-                                ))
-                            ) : (<p className="card-text">Not available</p>)}
-                        </div>
                     </div>
-                ))}
-            </div>
+                </div>
+            </main>
         </div>
     );
 }
